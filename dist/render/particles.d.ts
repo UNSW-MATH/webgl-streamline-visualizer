@@ -1,0 +1,35 @@
+import { ShaderProgram } from '../utils/shader-program';
+import type { BoundingBoxScaling } from './final';
+import type { ParticleBuffers } from './propagator';
+export declare class ParticleRenderer {
+    particleSize: number;
+    maxAge: number;
+    growthRate: number;
+    private program;
+    private width;
+    private height;
+    private numParticles;
+    private particleTexture;
+    private particleDataTexture;
+    private particleAgeTexture;
+    private positionBuffer;
+    private texCoordBuffer;
+    private vertexArray;
+    private widthParticleDataTexture;
+    private heightParticleDataTexture;
+    private isSpriteRenderer;
+    private doRotateParticles;
+    constructor(program: ShaderProgram, width: number, height: number, numParticles: number, particleSize: number, particleTexture: WebGLTexture, widthParticleDataTexture: number, heightParticleDataTexture: number, isSpriteRenderer: boolean, maxAge: number, growthRate: number, doRotateParticles: boolean);
+    initialise(): void;
+    destruct(doDeleteSharedResources?: boolean): void;
+    setDimensions(width: number, height: number): void;
+    setNumParticles(numParticles: number, widthParticlePositionTexture: number, heightParticlePositionTexture: number): void;
+    setMaxAge(maxAge: number): void;
+    setParticleTexture(texture: WebGLTexture): void;
+    setDoRotateParticles(doRotateParticles: boolean): void;
+    render(particleBuffers: ParticleBuffers, scaling?: BoundingBoxScaling): void;
+    private resetParticleDataTextures;
+    private createParticleDataTexture;
+    private updateParticleDataTextureFromBuffer;
+    private bindUniforms;
+}
