@@ -23,6 +23,7 @@ export interface StreamlineVisualiserOptions {
     particleColor?: string;
     spriteUrl?: URL;
     trailParticleOptions?: TrailParticleOptions;
+    particleOverlayOpacity?: number;
 }
 export declare function determineDoRotateParticles(options: Partial<StreamlineVisualiserOptions>): boolean;
 export declare class StreamlineVisualiser {

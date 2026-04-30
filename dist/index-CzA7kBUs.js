@@ -392,7 +392,8 @@ class de {
       speedExponent: e.speedExponent,
       particleColor: e.particleColor,
       spriteUrl: e.spriteUrl,
-      trailParticleOptions: e.trailParticleOptions
+      trailParticleOptions: e.trailParticleOptions,
+      particleOverlayOpacity: e.particleOverlayOpacity
     };
   }
 }
@@ -1102,7 +1103,7 @@ I([8, 32946], () => import("./deflate-DbhbvOaP.js").then((r) => r.default));
 I(32773, () => import("./packbits-BuzK6gM3.js").then((r) => r.default));
 I(
   34887,
-  () => import("./lerc-RuWwreJJ.js").then(async (r) => (await r.zstd.init(), r)).then((r) => r.default)
+  () => import("./lerc-BFCenl3x.js").then(async (r) => (await r.zstd.init(), r)).then((r) => r.default)
 );
 I(50001, () => import("./webimage--SJddlky.js").then((r) => r.default));
 function ge(r, e, t, i = 1) {
@@ -3055,8 +3056,13 @@ var Je;
   r[r.LightParticlesOnMagnitude = 0] = "LightParticlesOnMagnitude", r[r.DarkParticlesOnMagnitude = 1] = "DarkParticlesOnMagnitude", r[r.MagnitudeColoredParticles = 2] = "MagnitudeColoredParticles", r[r.ColoredParticles = 3] = "ColoredParticles";
 })(Je || (Je = {}));
 class H {
-  constructor(e, t, i) {
+  constructor(e, t, i, s = 1) {
     Object.defineProperty(this, "style", {
+      enumerable: !0,
+      configurable: !0,
+      writable: !0,
+      value: void 0
+    }), Object.defineProperty(this, "particleOverlayOpacity", {
       enumerable: !0,
       configurable: !0,
       writable: !0,
@@ -3101,7 +3107,7 @@ class H {
       configurable: !0,
       writable: !0,
       value: void 0
-    }), this.program = e, this.style = t, this.positionBuffer = null, this.texCoordBuffer = null, this.vertexArray = null, this.velocityImage = null, this.colormap = i, this.colormapTexture = null, this.velocityTexture = null;
+    }), this.program = e, this.style = t, this.particleOverlayOpacity = s, this.positionBuffer = null, this.texCoordBuffer = null, this.vertexArray = null, this.velocityImage = null, this.colormap = i, this.colormapTexture = null, this.velocityTexture = null;
   }
   initialise() {
     const e = this.program.gl, t = !1, [i, s, o] = Ue(this.program, -1, 1, -1, 1, t, "a_position", "a_tex_coord");
@@ -3125,7 +3131,7 @@ class H {
     if (!this.velocityImage)
       throw new Error("Velocity image is not defined, no velocity image was set?");
     const t = this.program.gl;
-    t.uniform2f(this.program.getUniformLocation("u_bbox_scale"), e.scaleX, e.scaleY), t.uniform2f(this.program.getUniformLocation("u_bbox_offset"), e.offsetX, e.offsetY), t.uniform1i(this.program.getUniformLocation("u_style"), this.style), t.uniform1f(this.program.getUniformLocation("u_colormap_start"), this.colormap.start), t.uniform1f(this.program.getUniformLocation("u_colormap_end"), this.colormap.end), t.uniform2f(this.program.getUniformLocation("u_scale"), this.velocityImage.uScale, this.velocityImage.vScale), t.uniform2f(this.program.getUniformLocation("u_offset"), this.velocityImage.uOffset, this.velocityImage.vOffset);
+    t.uniform2f(this.program.getUniformLocation("u_bbox_scale"), e.scaleX, e.scaleY), t.uniform2f(this.program.getUniformLocation("u_bbox_offset"), e.offsetX, e.offsetY), t.uniform1i(this.program.getUniformLocation("u_style"), this.style), t.uniform1f(this.program.getUniformLocation("u_particle_opacity"), this.particleOverlayOpacity), t.uniform1f(this.program.getUniformLocation("u_colormap_start"), this.colormap.start), t.uniform1f(this.program.getUniformLocation("u_colormap_end"), this.colormap.end), t.uniform2f(this.program.getUniformLocation("u_scale"), this.velocityImage.uScale, this.velocityImage.vScale), t.uniform2f(this.program.getUniformLocation("u_offset"), this.velocityImage.uOffset, this.velocityImage.vOffset);
   }
   bindTextures(e) {
     if (this.colormapTexture === null || this.velocityTexture === null)
@@ -3147,7 +3153,7 @@ precision highp float;uniform vec2 u_bbox_scale;uniform vec2 u_bbox_offset;in ve
 precision highp float;out vec4 color;void main(){color=vec4(0.0,0.0,0.0,0.0);}`, vi = `#version 300 es
 precision highp float;uniform sampler2D u_particle_texture;in vec2 v_tex_coord;out vec4 color;void main(){color=texture(u_particle_texture,v_tex_coord);}`, wi = `#version 300 es
 precision highp float;uniform sampler2D u_texture;uniform float u_fade_amount;in vec2 v_tex_coord;out vec4 color;void main(){color=texture(u_texture,v_tex_coord);color.a=max(color.a-u_fade_amount,0.0);}`, Ti = `#version 300 es
-precision highp float;uniform int u_style;uniform sampler2D u_particle_texture;uniform sampler2D u_colormap_texture;uniform sampler2D u_velocity_texture;uniform float u_colormap_start;uniform float u_colormap_end;uniform vec2 u_scale;uniform vec2 u_offset;in vec2 v_tex_coord;in vec2 v_flipped_tex_coord;out vec4 color;bool is_missing_velocity(vec4 raw){return raw.r==1.0&&raw.g==1.0;}float get_speed(vec2 pos){vec4 velocity_raw=texture(u_velocity_texture,pos);if(is_missing_velocity(velocity_raw)){return 0.0;}vec2 velocity=velocity_raw.rg*u_scale+u_offset;return length(velocity);}void main(){float speed=get_speed(v_flipped_tex_coord);if(speed>0.0){vec2 colormap_coords=vec2(0.0,0.0);colormap_coords.s=clamp((speed-u_colormap_start)/(u_colormap_end-u_colormap_start),0.0,1.0);lowp vec4 magnitude_color=texture(u_colormap_texture,colormap_coords);lowp vec4 particle_color=texture(u_particle_texture,v_tex_coord);if(u_style==0){color=mix(magnitude_color,vec4(1.0,1.0,1.0,1.0),particle_color.a);}else if(u_style==1){float factor=1.0-particle_color.a;color=magnitude_color;color.rgb*=factor*0.8+0.2;}else if(u_style==2){color=magnitude_color*particle_color.a;color.a=particle_color.a;}else if(u_style==3){color=magnitude_color;color.rgb=mix(magnitude_color.rgb,particle_color.rgb,particle_color.a);}else{color=vec4(0.0,0.0,0.0,0.0);}}else{color=vec4(0.0,0.0,0.0,0.0);}}`;
+precision highp float;uniform int u_style;uniform float u_particle_opacity;uniform sampler2D u_particle_texture;uniform sampler2D u_colormap_texture;uniform sampler2D u_velocity_texture;uniform float u_colormap_start;uniform float u_colormap_end;uniform vec2 u_scale;uniform vec2 u_offset;in vec2 v_tex_coord;in vec2 v_flipped_tex_coord;out vec4 color;bool is_missing_velocity(vec4 raw){return raw.r==1.0&&raw.g==1.0;}float get_speed(vec2 pos){vec4 velocity_raw=texture(u_velocity_texture,pos);if(is_missing_velocity(velocity_raw)){return 0.0;}vec2 velocity=velocity_raw.rg*u_scale+u_offset;return length(velocity);}void main(){float speed=get_speed(v_flipped_tex_coord);if(speed>0.0){vec2 colormap_coords=vec2(0.0,0.0);colormap_coords.s=clamp((speed-u_colormap_start)/(u_colormap_end-u_colormap_start),0.0,1.0);lowp vec4 magnitude_color=texture(u_colormap_texture,colormap_coords);lowp vec4 particle_color=texture(u_particle_texture,v_tex_coord);if(u_style==0){color=mix(magnitude_color,vec4(1.0,1.0,1.0,1.0),particle_color.a*u_particle_opacity);}else if(u_style==1){float factor=1.0-particle_color.a*u_particle_opacity;color=magnitude_color;color.rgb*=factor*0.8+0.2;}else if(u_style==2){color=magnitude_color*particle_color.a;color.a=particle_color.a;}else if(u_style==3){color=magnitude_color;color.rgb=mix(magnitude_color.rgb,particle_color.rgb,particle_color.a);}else{color=vec4(0.0,0.0,0.0,0.0);}}else{color=vec4(0.0,0.0,0.0,0.0);}}`;
 class mt {
   constructor(e, t, i) {
     Object.defineProperty(this, "gl", {
@@ -3331,7 +3337,7 @@ class q {
     const [t, i, s, o] = await this.compileShaderPrograms();
     this.programRenderParticles = i;
     const a = this.createParticleTexture(), n = q.computeSpeedCurve(e, this._options);
-    if (this.textureRenderer = new gi(s), this.particlePropagator = new Me(t, this.width, this.height, this._numParticles, this.numParticlesAllocate, this._options.maxAge, n), this.particleRenderer = new we(i, this.width, this.height, this._numParticles, this._options.particleSize, a, this.widthParticleDataTexture, this.heightParticleDataTexture, !1, this._options.maxAge, this._options.growthRate ?? this.DEFAULT_GROWTH_RATE, Qe(this._options)), this.finalRenderer = new H(o, this._options.style, e), this.textureRenderer.initialise(), this.particlePropagator.initialise(), this.particleRenderer.initialise(), this.finalRenderer.initialise(), this.options.spriteUrl) {
+    if (this.textureRenderer = new gi(s), this.particlePropagator = new Me(t, this.width, this.height, this._numParticles, this.numParticlesAllocate, this._options.maxAge, n), this.particleRenderer = new we(i, this.width, this.height, this._numParticles, this._options.particleSize, a, this.widthParticleDataTexture, this.heightParticleDataTexture, !1, this._options.maxAge, this._options.growthRate ?? this.DEFAULT_GROWTH_RATE, Qe(this._options)), this.finalRenderer = new H(o, this._options.style, e, this._options.particleOverlayOpacity), this.textureRenderer.initialise(), this.particlePropagator.initialise(), this.particleRenderer.initialise(), this.finalRenderer.initialise(), this.options.spriteUrl) {
       const l = await this.createSpriteTexture();
       this.spriteRenderer = new we(i, this.width, this.height, this._numParticles, this._options.particleSize, l, this.widthParticleDataTexture, this.heightParticleDataTexture, !0, this._options.maxAge, this._options.growthRate ?? this.DEFAULT_GROWTH_RATE, !0), this.spriteRenderer.initialise();
     }
@@ -3384,7 +3390,7 @@ class q {
     const t = q.computeSpeedCurve(this.colorMap, this._options);
     this.particlePropagator.setSpeedCurve(t);
     const i = this._options.growthRate ?? this.DEFAULT_GROWTH_RATE;
-    this.particleRenderer.particleSize = this._options.particleSize, this.particleRenderer.growthRate = i, this.spriteRenderer && (this.spriteRenderer.particleSize = this._options.particleSize, this.spriteRenderer.growthRate = i), this.finalRenderer.style = this._options.style;
+    this.particleRenderer.particleSize = this._options.particleSize, this.particleRenderer.growthRate = i, this.spriteRenderer && (this.spriteRenderer.particleSize = this._options.particleSize, this.spriteRenderer.growthRate = i), this.finalRenderer.style = this._options.style, this.finalRenderer.particleOverlayOpacity = this._options.particleOverlayOpacity ?? 1;
     const s = this.createParticleTexture();
     this.particleRenderer.setParticleTexture(s);
     const o = Qe(this._options);

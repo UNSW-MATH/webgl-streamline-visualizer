@@ -16,6 +16,7 @@ export declare enum StreamlineStyle {
 export declare class FinalRenderer {
     private static readonly NUM_SEGMENTS_COLORMAP;
     style: StreamlineStyle;
+    particleOverlayOpacity: number;
     private program;
     private positionBuffer;
     private texCoordBuffer;
@@ -24,7 +25,7 @@ export declare class FinalRenderer {
     private colormap;
     private colormapTexture;
     private velocityTexture;
-    constructor(program: ShaderProgram, style: StreamlineStyle, colormap: Colormap);
+    constructor(program: ShaderProgram, style: StreamlineStyle, colormap: Colormap, particleOverlayOpacity?: number);
     initialise(): void;
     destruct(): void;
     render(particleTexture: WebGLTexture, scaling: BoundingBoxScaling): void;

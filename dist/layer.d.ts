@@ -20,6 +20,7 @@ export interface WMSStreamlineLayerOptions {
     spriteUrl?: URL;
     trailParticleOptions?: TrailParticleOptions;
     transformRequest?: TransformRequestFunction;
+    particleOverlayOpacity?: number;
 }
 export declare class WMSStreamlineLayer implements CustomLayerInterface {
     private static readonly MAX_PARTICLE_DISPLACEMENT;
