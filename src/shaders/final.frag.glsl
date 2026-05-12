@@ -34,11 +34,20 @@ float get_speed(vec2 pos) {
     return length(velocity);
 }
 
+float get_validity(vec2 pos) {
+    vec4 velocity_raw = texture(u_velocity_texture, pos);
+    // Sharp cutoff: fully opaque if any validity, transparent if none.
+    return velocity_raw.a > 0.004 ? 1.0 : 0.0;
+}
+
 void main() {
     // Get the speed at the current point (in physical units), we need flipped
     // texture coordinates because the velocity texture was loaded from an
     // image and therefore flipped vertically.
     float speed = get_speed(v_flipped_tex_coord);
+
+    // Get the validity (alpha) at this point for smooth edge fading.
+    float validity = get_validity(v_flipped_tex_coord);
 
     if (speed > 0.0) {
         // Find the coordinate into the colormap texture for this speed.
@@ -83,6 +92,9 @@ void main() {
             // Invalid style, just render transparent pixels.
             color = vec4(0.0, 0.0, 0.0, 0.0);
         }
+
+        // Apply validity mask for smooth edge fading.
+        color.a *= validity;
     } else {
         color = vec4(0.0, 0.0, 0.0, 0.0);
     }

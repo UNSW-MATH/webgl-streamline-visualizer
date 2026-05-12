@@ -72,6 +72,9 @@ vec2 get_clip_space_velocity(vec2 pos) {
     // Correct the x-velocity for the aspect ratio of the canvas.
     velocity.x *= u_aspect_ratio;
 
+    // Scale velocity by validity to suppress particles at data edges.
+    velocity *= velocity_raw.a;
+
     return velocity;
 }
 
